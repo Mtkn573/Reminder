@@ -76,7 +76,6 @@
     }
     subscribe()
     document.getElementById(`notify`).addEventListener(`click`, function () {
-      // fetch(`/notify`, { method: `POST` })
       navigator.serviceWorker.ready.then(function (registration) {
         registration.active.postMessage({
           type: `showNotification`,
@@ -133,16 +132,7 @@
         hours = currentTime.getHours()
         minutes = currentTime.getMinutes()
         if (hours == Number(document.getElementById(`reminderTime`).value.substring(0, 2)) && minutes == Number(document.getElementById(`reminderTime`).value.substring(3, 5))) {
-          Notification.requestPermission().then(function (permission) {
-            if (permission == `granted`) {
-              navigator.serviceWorker.ready.then(function (registration) {
-                registration.active.postMessage({
-                  type: `showNotification`,
-                  body: `${text}`
-                })
-              })
-            }
-          })
+          fetch(`/notify`, { method: `POST` })
         }
       }, 60 * 1000)//Call every minute.
     })
