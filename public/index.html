@@ -76,7 +76,13 @@
     }
     subscribe()
     document.getElementById(`notify`).addEventListener(`click`, function () {
-      fetch(`/notify`, { method: `POST` })
+      // fetch(`/notify`, { method: `POST` })
+      navigator.serviceWorker.ready.then(function (registration) {
+        registration.active.postMessage({
+          type: `showNotification`,
+          body: `Test.`
+        })
+      })
     })
     if (localStorage.getItem(`reminderData`) == null) {
       localStorage.setItem(`reminderData`, `<root></root>`)
