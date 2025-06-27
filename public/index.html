@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Reminder</title>
+</head>
+
+<body>
+  <h1>Web Push z Node.js</h1>
+  <button id="subscribe">Subskrybuj</button>
+  <button id="notify">Wyślij powiadomienie</button>
+  <script>
+    function urlBase64ToUint8Array(base64String) {
+      padding = '='.repeat((4 - base64String.length % 4) % 4)
+      base64 = (base64String + padding)
+        .replace(/-/g, '+')
+        .replace(/_/g, '/')
+      rawData = atob(base64)
+      return Uint8Array.from([...rawData].map(function (c) {
+        c.charCodeAt(0)
+      }))
+    }
+    publicVapidKey = 'BAOHBF0QJuiE-kKK2ZhRMMp0XHos3d7hzyuQuktw1RDmLvgtwzFQpNisLpQ8Be7PBxlTVQ6AjIXBkUPADjwlF2I'
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('serviceWorker.js').then(function () {
+        console.log('Service Worker zarejestrowany')
+      })
+    }
+    document.getElementById('subscribe').addEventListener('click', async function () {
+      registration = await navigator.serviceWorker.ready
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+      })
+      await fetch('/subscribe', {
+        method: 'POST',
+        body: JSON.stringify(subscription),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      alert('Subskrybowano!')
+    })
+    document.getElementById('notify').addEventListener('click', function () {
+      fetch('/notify', { method: 'POST' })
+    })
+  </script>
+</body>
+
+</html>
