@@ -19,7 +19,7 @@ app.post(`/subscribe`, function (request, response) {
     if (!subscriptions.find(function (subscription) {
         return subscription.endpoint === request.body.endpoint
     })) {
-        subscriptions.push({ endpoint: subscription.endpoint, subscription })
+        subscriptions.push({ endpoint: request.body.endpoint, subscription: request.body })
     }
     response.status(201).json({})
 })
@@ -28,9 +28,9 @@ app.post(`/notify`, async function (request, response) {
         title: `Reminder.`,
         body: request.body.text
     })
-    subscriptionObject = subscriptions.find(function (subscription) { 
-        return subscription.endpoint === request.body.endpoint 
-    }) 
+    subscriptionObject = subscriptions.find(function (subscription) {
+        return subscription.endpoint === request.body.endpoint
+    })
     if (!subscriptionObject) {
         return response.status(404).json({ message: "Subscription not found" })
     }
