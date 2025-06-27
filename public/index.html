@@ -30,7 +30,6 @@
 
 <body>
   <div id="main" style="display: none; height: 100%; align-items: flex-end;">
-    <button id="notify">Wyślij powiadomienie</button>
     <img id="add" src="add.png" style="width: 10%; height: 100%;">
     <div id="data"></div>
   </div>
@@ -75,14 +74,6 @@
       })
     }
     subscribe()
-    document.getElementById(`notify`).addEventListener(`click`, function () {
-      navigator.serviceWorker.ready.then(function (registration) {
-        registration.active.postMessage({
-          type: `showNotification`,
-          body: `Test.`
-        })
-      })
-    })
     if (localStorage.getItem(`reminderData`) == null) {
       localStorage.setItem(`reminderData`, `<root></root>`)
     }
