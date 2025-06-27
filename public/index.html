@@ -1,48 +1,145 @@
-<!DOCTYPE html>
-<html>
+<html lang="pl">
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reminder</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    .box {
+      width: 10%;
+      height: 30px;
+    }
+
+    #data {
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      align-items: flex-end;
+      width: 100%;
+      max-height: 100vh;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>Web Push z Node.js</h1>
   <button id="subscribe">Subskrybuj</button>
   <button id="notify">Wyślij powiadomienie</button>
+  <div id="main" style="display: flex; height: 100%; align-items: flex-end;">
+    <img id="add" src="add.png" style="width: 10%; height: 100%;">
+    <div id="data"></div>
+  </div>
+  <form id="choice" style="display: none; flex-direction: column; justify-content: flex-end; height: 100%;">
+    <div>Proszę wprowadzić treść przypomnienia.</div>
+    <input id="reminderContent">
+    <div>Proszę wprowadzić godzinę przypomnienia.</div>
+    <input id="reminderTime" type="time" required>
+    <input type="submit" id="accept" value=""
+      style="background: url(accept.png); background-repeat: no-repeat; background-position: center; background-color: black; width: 100%; height: 60px;">
+  </form>
   <script>
     function urlBase64ToUint8Array(base64String) {
-      padding = '='.repeat((4 - base64String.length % 4) % 4)
+      padding = `=`.repeat((4 - base64String.length % 4) % 4)
       base64 = (base64String + padding)
-        .replace(/-/g, '+')
-        .replace(/_/g, '/')
+        .replace(/-/g, `+`)
+        .replace(/_/g, `/`)
       rawData = atob(base64)
       return Uint8Array.from([...rawData].map(function (c) {
         return c.charCodeAt(0)
       }))
     }
-    publicVapidKey = 'BAOHBF0QJuiE-kKK2ZhRMMp0XHos3d7hzyuQuktw1RDmLvgtwzFQpNisLpQ8Be7PBxlTVQ6AjIXBkUPADjwlF2I'
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('serviceWorker.js').then(function () {
-        console.log('Service Worker zarejestrowany')
+    publicVapidKey = `BAOHBF0QJuiE-kKK2ZhRMMp0XHos3d7hzyuQuktw1RDmLvgtwzFQpNisLpQ8Be7PBxlTVQ6AjIXBkUPADjwlF2I`
+    if (`serviceWorker` in navigator) {
+      navigator.serviceWorker.register(`serviceWorker.js`).then(function () {
+      }).catch(function (error) {
+        console.log(`Service Worker registration failed:`, error)
       })
     }
-    document.getElementById('subscribe').addEventListener('click', async function () {
+    document.getElementById(`subscribe`).addEventListener(`click`, async function () {
       registration = await navigator.serviceWorker.ready
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
       })
-      await fetch('/subscribe', {
-        method: 'POST',
+      await fetch(`/subscribe`, {
+        method: `POST`,
         body: JSON.stringify(subscription),
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json"
         }
       })
-      alert('Subskrybowano!')
+    alert(`Zasubskrybowano!`)
     })
-    document.getElementById('notify').addEventListener('click', function () {
-      fetch('/notify', { method: 'POST' })
+    document.getElementById(`notify`).addEventListener(`click`, function () {
+      fetch(`/notify`, { method: `POST` })
+    })
+    if (localStorage.getItem(`reminderData`) == null) {
+      localStorage.setItem(`reminderData`, `<root></root>`)
+    }
+    domParser = new DOMParser()
+    xmlDocument = domParser.parseFromString(localStorage.getItem(`reminderData`), `text/xml`)
+    for (i = 0; i < xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`).length; i++) {
+      reminderContent = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderContent`)[0].textContent
+      reminderTime = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderTime`)[0].textContent
+      text = `„${reminderContent}” o ${reminderTime}.`
+      box = document.createElement(`div`)
+      box.style.display = `flex`
+      div = document.createElement(`div`)
+      div.textContent = text
+      box.appendChild(div)
+      document.getElementById(`data`).appendChild(box)
+    }
+    document.getElementById(`add`).addEventListener(`click`, function () {
+      document.getElementById(`main`).style.display = `none`
+      document.getElementById(`choice`).style.display = `flex`
+    })
+    document.getElementById(`choice`).addEventListener(`submit`, function (event) {
+      event.preventDefault()
+      document.getElementById(`choice`).style.display = `none`
+      document.getElementById(`main`).style.display = `flex`
+      text = `„${document.getElementById(`reminderContent`).value}” o ${document.getElementById(`reminderTime`).value}.`
+      box = document.createElement(`div`)
+      box.style.display = `flex`
+      div = document.createElement(`div`)
+      div.textContent = text
+      box.appendChild(div)
+      document.getElementById(`data`).appendChild(box)
+      domParser = new DOMParser()
+      xmlDocument = domParser.parseFromString(localStorage.getItem(`reminderData`), `text/xml`)
+      reminderContentNode = xmlDocument.createElement(`reminderContent`)
+      reminderContentNode.textContent = document.getElementById(`reminderContent`).value
+      reminderTimeNode = xmlDocument.createElement(`reminderTime`)
+      reminderTimeNode.innerHTML = document.getElementById(`reminderTime`).value
+      eventNode = xmlDocument.createElement(`event`)
+      eventNode.appendChild(reminderContentNode)
+      eventNode.appendChild(reminderTimeNode)
+      xmlDocument.getElementsByTagName(`root`)[0].appendChild(eventNode)
+      xmlSerializer = new XMLSerializer()
+      string = xmlSerializer.serializeToString(xmlDocument)
+      localStorage.setItem(`reminderData`, string)
+      setInterval(function () {
+        currentTime = new Date()
+        hours = currentTime.getHours()
+        minutes = currentTime.getMinutes()
+        if (hours == Number(document.getElementById(`reminderTime`).value.substring(0, 2)) && minutes == Number(document.getElementById(`reminderTime`).value.substring(3, 5))) {
+          Notification.requestPermission().then(function (permission) {
+            if (permission == `granted`) {
+              navigator.serviceWorker.ready.then(function (registration) {
+                registration.active.postMessage({
+                  type: `showNotification`,
+                  body: `${text}`
+                })
+              })
+            }
+          })
+        }
+      }, 60 * 1000)//Call every minute.
     })
   </script>
 </body>
