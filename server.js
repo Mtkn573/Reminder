@@ -16,8 +16,11 @@ webpush.setVapidDetails(
 )
 subscriptions = []
 app.post(`/subscribe`, function (request, response) {
-    subscription = request.body;
-    subscriptions.push(subscription)
+    if (!subscriptions.find(function (subscription) {
+        return subscription.endpoint === request.body.endpoint
+    })) {
+        subscriptions.push({ endpoint: subscription.endpoint, subscription })
+    }
     response.status(201).json({})
 })
 app.post(`/notify`, async function (request, response) {
@@ -25,15 +28,21 @@ app.post(`/notify`, async function (request, response) {
         title: `Reminder.`,
         body: request.body.text
     })
-    sendPromises = subscriptions.map(function (subscription) {
-        webpush.sendNotification(subscription, payload).catch(function (error) {
-            console.error(err)
-        })
-    })
-    await Promise.all(sendPromises)
-    response.status(200).json({ message: `Powiadomienia wysłane` })
+    subscriptionObject = subscriptions.find(function (subscription) { 
+        return subscription.endpoint === request.body.endpoint 
+    }) 
+    if (!subscriptionObject) {
+        return response.status(404).json({ message: "Subscription not found" })
+    }
+    try {
+        await webpush.sendNotification(subscriptionObject.subscription, payload)
+        response.status(200).json({ message: `Notification sent.` })
+    } catch (error) {
+        console.error(error)
+        response.status(500).json({ message: "Notification sending error." })
+    }
 });
 PORT = process.env.PORT || 3000
 app.listen(PORT, function () {
     console.log(`Server running on port ${PORT}`)
-})
+}) 

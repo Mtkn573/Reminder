@@ -118,6 +118,27 @@
       xmlSerializer = new XMLSerializer()
       string = xmlSerializer.serializeToString(xmlDocument)
       localStorage.setItem(`reminderData`, string)
+      let myEndpoint = null
+      navigator.serviceWorker.ready.then(function (registration) {
+        registration.pushManager.getSubscription().then(function (subscription) {
+          if (subscription) {
+            myEndpoint = subscription.endpoint
+          }
+        });
+      });
+      function sendNotification(text) {
+        if (!myEndpoint) return
+        fetch(`/notify`, {
+          method: `POST`,
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            endpoint: myEndpoint,
+            text: text
+          })
+        })
+      }
       setInterval(function () {
         currentTime = new Date()
         hours = currentTime.getHours()
@@ -128,15 +149,7 @@
             minutes == Number(document.getElementById(`reminderTime`).value.substring(3, 5)) &&
           seconds == 0
         ) {
-          fetch(`/notify`, {
-            method: `POST`,
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                text: `„${document.getElementById(`reminderContent`).value}” o ${document.getElementById(`reminderTime`).value}.`
-            })
-          })
+            sendNotification(`„${document.getElementById(`reminderContent`).value}” o ${document.getElementById(`reminderTime`).value}.`)
         }
       }, 1000)
     })
