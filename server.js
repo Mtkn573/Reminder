@@ -22,8 +22,8 @@ app.post(`/subscribe`, function (request, response) {
 })
 app.post(`/notify`, async function (request, response) {
     payload = JSON.stringify({
-        title: `Powiadomienie!`,
-        body: `To jest testowe Web Push z backendu`
+        title: `Reminder.`,
+        body: request.body.text
     })
     sendPromises = subscriptions.map(function (subscription) {
         webpush.sendNotification(subscription, payload).catch(function (error) {

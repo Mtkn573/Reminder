@@ -137,7 +137,15 @@
             minutes == Number(document.getElementById(`reminderTime`).value.substring(3, 5)) &&
           seconds == 0
         ) {
-          fetch(`/notify`, { method: `POST` })
+          fetch(`/notify`, {
+            method: `POST`,
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                text: `„${document.getElementById(`reminderContent`).value}” o ${reminderTimeValue}.`
+            })
+          })
         }
       }, 1000)
     })
