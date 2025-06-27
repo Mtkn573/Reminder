@@ -17,7 +17,7 @@
         .replace(/_/g, '/')
       rawData = atob(base64)
       return Uint8Array.from([...rawData].map(function (c) {
-        c.charCodeAt(0)
+        return c.charCodeAt(0)
       }))
     }
     publicVapidKey = 'BAOHBF0QJuiE-kKK2ZhRMMp0XHos3d7hzyuQuktw1RDmLvgtwzFQpNisLpQ8Be7PBxlTVQ6AjIXBkUPADjwlF2I'
