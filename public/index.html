@@ -29,9 +29,8 @@
 </head>
 
 <body>
-  <button id="subscribe">Subskrybuj</button>
-  <button id="notify">Wyślij powiadomienie</button>
-  <div id="main" style="display: flex; height: 100%; align-items: flex-end;">
+  <div id="main" style="display: none; height: 100%; align-items: flex-end;">
+    <button id="notify">Wyślij powiadomienie</button>
     <img id="add" src="add.png" style="width: 10%; height: 100%;">
     <div id="data"></div>
   </div>
@@ -61,7 +60,7 @@
         console.log(`Service Worker registration failed:`, error)
       })
     }
-    document.getElementById(`subscribe`).addEventListener(`click`, async function () {
+    async function subscribe() {
       registration = await navigator.serviceWorker.ready
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
@@ -74,8 +73,8 @@
           "Content-Type": "application/json"
         }
       })
-    alert(`Zasubskrybowano!`)
-    })
+    }
+    subscribe()
     document.getElementById(`notify`).addEventListener(`click`, function () {
       fetch(`/notify`, { method: `POST` })
     })
