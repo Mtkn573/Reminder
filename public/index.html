@@ -165,6 +165,8 @@
           seconds == 0
         ) {
           sendNotification(`„${document.getElementById(`reminderContent`).value}” o ${document.getElementById(`reminderTime`).value}.`)
+          audio = new Audio(`notificationSound.mp3`);
+          audio.play()
         }
       }, 1000)
     })   
