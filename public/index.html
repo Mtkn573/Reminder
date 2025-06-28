@@ -37,17 +37,17 @@
     <div>Proszę wprowadzić treść przypomnienia.</div>
     <input id="reminderContent">
     <div>Proszę wprowadzić co ile dni ma być przypomnienie.</div>
-    <input type="number" min="0">
+    <input id="reminderDelayInDays" type="number" min="0">
     <div>Proszę wprowadzić godzinę przypomnienia.</div>
     <input id="reminderTime" type="time" required>
     <div>Proszę wprowadzić datę od której ma być przypomnienie.</div>
-    <input type="date" required>
+    <input id="reminderStartingDate" type="date" required>
     <div>Proszę wybrać rodzaj przypomnienia.</div>
     <div style="display: flex;">
-      <input type="radio" name="length" value="short" id="short" checked>
-      <label for="short">Szybkie.</label><br>
-      <input type="radio" name="length" value="long" id="long">
-      <label for="long">Szybkie i wolne.</label>
+      <input type="radio" name="speed" value="fast" id="fast" checked>
+      <label for="fast">Szybkie.</label><br>
+      <input type="radio" name="speed" value="fastAndSlow" id="fastAndSlow">
+      <label for="fastAndSlow">Szybkie i wolne.</label>
     </div>
     <input type="submit" id="accept" value=""
       style="background: url(accept.png); background-repeat: no-repeat; background-position: center; background-color: black; width: 100%; height: 60px;">
@@ -116,7 +116,25 @@
       event.preventDefault()
       document.getElementById(`choice`).style.display = `none`
       document.getElementById(`main`).style.display = `flex`
-      text = `„${document.getElementById(`reminderContent`).value}” o ${document.getElementById(`reminderTime`).value}.`
+      if (document.getElementById(`reminderDelayInDays`).value == ``) {
+        document.getElementById(`reminderDelayInDays`).value = 0
+      }
+      if (document.getElementById(`fast`).checked) {
+        if (document.getElementById(`reminderDelayInDays`).value > 0) {
+          text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`)} co ${document.getElementById(`reminderDelayInDays`).value} dni.`
+        }
+        else {
+          text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`)}.`
+        }
+      }
+      else if (document.getElementById(`fastAndSlow`).checked) {
+        if (document.getElementById(`reminderDelayInDays`).value > 0) {
+          text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie i wolne przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`)} co ${document.getElementById(`reminderDelayInDays`).value} dni.`
+        }
+        else {
+          text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie i wolne przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`)}.`
+        }
+      }
       box = document.createElement(`div`)
       box.style.display = `flex`
       div = document.createElement(`div`)
@@ -168,7 +186,7 @@
         }
       }, 1000)
     })   
-  </script> 
+  </script>
 </body>
 
 </html>
