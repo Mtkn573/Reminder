@@ -121,7 +121,12 @@
       }
       if (document.getElementById(`fast`).checked) {
         if (document.getElementById(`reminderDelayInDays`).value > 0) {
-          text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`).value} co ${document.getElementById(`reminderDelayInDays`).value} dni.`
+          if (document.getElementById(`reminderDelayInDays`).value == 1) {
+            text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`).value} codziennie.`
+          }
+          else {
+            text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`).value} co ${document.getElementById(`reminderDelayInDays`).value} dni.`
+          }
         }
         else {
           text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`).value}.`
@@ -129,7 +134,12 @@
       }
       else if (document.getElementById(`fastAndSlow`).checked) {
         if (document.getElementById(`reminderDelayInDays`).value > 0) {
-          text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie i wolne przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`).value} co ${document.getElementById(`reminderDelayInDays`).value} dni.`
+          if (document.getElementById(`reminderDelayInDays`).value == 1) {
+            text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie i wolne przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`).value} codziennie.`
+          }
+          else {
+            text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie i wolne przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`).value} co ${document.getElementById(`reminderDelayInDays`).value} dni.`
+          }
         }
         else {
           text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie i wolne przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`).value}.`
