@@ -164,7 +164,7 @@
       xmlSerializer = new XMLSerializer()
       string = xmlSerializer.serializeToString(xmlDocument)
       localStorage.setItem(`reminderData`, string)
-      let myEndpoint = null
+      myEndpoint = null
       navigator.serviceWorker.ready.then(function (registration) {
         registration.pushManager.getSubscription().then(function (subscription) {
           if (subscription) {
@@ -173,7 +173,9 @@
         });
       });
       function sendNotification(text) {
-        if (!myEndpoint) return
+        if (!myEndpoint) {
+          return
+        }
         fetch(`/notify`, {
           method: `POST`,
           headers: {
@@ -192,7 +194,7 @@
           currentTime.getMinutes() == Number(document.getElementById(`reminderTime`).value.substring(3, 5)) &&
           currentTime.getSeconds() == 0
         ) {
-          sendNotification(`„${document.getElementById(`reminderContent`).value}” o ${document.getElementById(`reminderTime`).value}.`)
+          sendNotification(text)
         }
       }, 1000)
     })   
