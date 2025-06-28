@@ -73,6 +73,13 @@
         }
       })
     }
+    counter = 0
+    document.getElementsByTagName(`body`)[0].addEventListener(`click`, function () {
+      counter++
+      if (counter == 10) {
+        document.getElementById(`main`).style.display = `flex`
+      }
+    })
     subscribe()
     if (localStorage.getItem(`reminderData`) == null) {
       localStorage.setItem(`reminderData`, `<root></root>`)
@@ -145,11 +152,11 @@
         minutes = currentTime.getMinutes()
         seconds = currentTime.getSeconds()
         if (
-            hours == Number(document.getElementById(`reminderTime`).value.substring(0, 2)) &&
-            minutes == Number(document.getElementById(`reminderTime`).value.substring(3, 5)) &&
+          hours == Number(document.getElementById(`reminderTime`).value.substring(0, 2)) &&
+          minutes == Number(document.getElementById(`reminderTime`).value.substring(3, 5)) &&
           seconds == 0
         ) {
-            sendNotification(`„${document.getElementById(`reminderContent`).value}” o ${document.getElementById(`reminderTime`).value}.`)
+          sendNotification(`„${document.getElementById(`reminderContent`).value}” o ${document.getElementById(`reminderTime`).value}.`)
         }
       }, 1000)
     })
