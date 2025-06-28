@@ -119,6 +119,16 @@
       div = document.createElement(`div`)
       div.textContent = text
       box.appendChild(div)
+      deleteBtn = document.createElement('button')
+      deleteBtn.textContent = 'Usuń'
+      deleteBtn.onclick = function () {
+        box.remove()
+        if (window.audio) {
+          window.audio.pause()
+          window.audio.currentTime = 0
+        }
+      }
+      box.appendChild(deleteBtn)
       document.getElementById(`data`).appendChild(box)
       domParser = new DOMParser()
       xmlDocument = domParser.parseFromString(localStorage.getItem(`reminderData`), `text/xml`)
@@ -165,6 +175,10 @@
           seconds == 0
         ) {
           sendNotification(`„${document.getElementById(`reminderContent`).value}” o ${document.getElementById(`reminderTime`).value}.`)
+          window.audio = new Audio("notificationSound.mp3")
+          window.audio.play().catch(function (error) {
+            console.error("Audio playback failed:", error)
+          })
         }
       }, 1000)
     })   
