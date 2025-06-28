@@ -37,15 +37,18 @@
     <div>Proszę wprowadzić treść przypomnienia.</div>
     <input id="reminderContent">
     <div>Proszę wprowadzić co ile dni ma być przypomnienie.</div>
-    <input>
+    <input type="number" min="0">
     <div>Proszę wprowadzić godzinę przypomnienia.</div>
     <input id="reminderTime" type="time" required>
     <div>Proszę wprowadzić datę od której ma być przypomnienie.</div>
-    <input required>
-    <div>Proszę wybrać długość dźwięku przypomnienia.</div>
-    <input type="radio" name="length" value="short" id="short" checked>
-    <label for="short">Krótki.</label><br <input type="radio" name="length" value="long" id="long">
-    <label for="long">Długi.</label>
+    <input type="date" required>
+    <div>Proszę wybrać rodzaj przypomnienia.</div>
+    <div style="display: flex;">
+      <input type="radio" name="length" value="short" id="short" checked>
+      <label for="short">Szybkie.</label><br>
+      <input type="radio" name="length" value="long" id="long">
+      <label for="long">Szybkie i wolne.</label>
+    </div>
     <input type="submit" id="accept" value=""
       style="background: url(accept.png); background-repeat: no-repeat; background-position: center; background-color: black; width: 100%; height: 60px;">
   </form>
@@ -156,21 +159,16 @@
       }
       setInterval(function () {
         currentTime = new Date()
-        hours = currentTime.getHours()
-        minutes = currentTime.getMinutes()
-        seconds = currentTime.getSeconds()
         if (
-          hours == Number(document.getElementById(`reminderTime`).value.substring(0, 2)) &&
-          minutes == Number(document.getElementById(`reminderTime`).value.substring(3, 5)) &&
-          seconds == 0
+          currentTime.getHours() == Number(document.getElementById(`reminderTime`).value.substring(0, 2)) &&
+          currentTime.getMinutes() == Number(document.getElementById(`reminderTime`).value.substring(3, 5)) &&
+          currentTime.getSeconds() == 0
         ) {
           sendNotification(`„${document.getElementById(`reminderContent`).value}” o ${document.getElementById(`reminderTime`).value}.`)
-          audio = new Audio(`notificationSound.mp3`);
-          audio.play()
         }
       }, 1000)
     })   
-  </script>
+  </script> 
 </body>
 
 </html>
