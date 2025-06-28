@@ -63,13 +63,6 @@
         return c.charCodeAt(0)
       }))
     }
-    publicVapidKey = `BAOHBF0QJuiE-kKK2ZhRMMp0XHos3d7hzyuQuktw1RDmLvgtwzFQpNisLpQ8Be7PBxlTVQ6AjIXBkUPADjwlF2I`
-    if (`serviceWorker` in navigator) {
-      navigator.serviceWorker.register(`serviceWorker.js`).then(function () {
-      }).catch(function (error) {
-        console.log(`Service Worker registration failed:`, error)
-      })
-    }
     async function subscribe() {
       registration = await navigator.serviceWorker.ready
       subscription = await registration.pushManager.subscribe({
@@ -82,6 +75,28 @@
         headers: {
           "Content-Type": "application/json"
         }
+      })
+    }
+    function sendNotification(text) {
+      if (!myEndpoint) {
+        return
+      }
+      fetch(`/notify`, {
+        method: `POST`,
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          endpoint: myEndpoint,
+          text: text
+        })
+      })
+    }
+    publicVapidKey = `BAOHBF0QJuiE-kKK2ZhRMMp0XHos3d7hzyuQuktw1RDmLvgtwzFQpNisLpQ8Be7PBxlTVQ6AjIXBkUPADjwlF2I`
+    if (`serviceWorker` in navigator) {
+      navigator.serviceWorker.register(`serviceWorker.js`).then(function () {
+      }).catch(function (error) {
+        console.log(`Service Worker registration failed:`, error)
       })
     }
     counter = 0
@@ -99,8 +114,36 @@
     xmlDocument = domParser.parseFromString(localStorage.getItem(`reminderData`), `text/xml`)
     for (i = 0; i < xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`).length; i++) {
       reminderContent = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderContent`)[0].textContent
+      reminderDelayInDays = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderDelayInDays`)[0].textContent
       reminderTime = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderTime`)[0].textContent
-      text = `„${reminderContent}” o ${reminderTime}.`
+      reminderStartingDate = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderStartingDate`)[0].textContent
+      reminderType = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderType`)[0].textContent
+      if (reminderType == `fast`) {
+        if (reminderDelayInDays > 0) {
+          if (reminderDelayInDays == 1) {
+            text = `„${reminderContent}” planowo następne szybkie przypomnienie ${reminderTime} ${reminderStartingDate} codziennie.`
+          }
+          else {
+            text = `„${reminderContent}” planowo następne szybkie przypomnienie ${reminderTime} ${reminderStartingDate} co ${reminderDelayInDays} dni.`
+          }
+        }
+        else {
+          text = `„${reminderContent}” planowo następne szybkie przypomnienie ${reminderTime} ${reminderStartingDate}.`
+        }
+      }
+      else if (reminderType == `fastAndSlow`) {
+        if (reminderDelayInDays > 0) {
+          if (reminderDelayInDays == 1) {
+            text = `„${reminderContent}” planowo następne szybkie przypomnienie i wolne przypomnienie ${reminderTime} ${reminderStartingDate} codziennie.`
+          }
+          else {
+            text = `„${reminderContent}” planowo następne szybkie przypomnienie i wolne przypomnienie ${reminderTime} ${reminderStartingDate} co ${reminderDelayInDays} dni.`
+          }
+        }
+        else {
+          text = `„${reminderContent}” planowo następne szybkie przypomnienie i wolne przypomnienie ${reminderTime} ${reminderStartingDate}.`
+        }
+      }
       box = document.createElement(`div`)
       box.style.display = `flex`
       div = document.createElement(`div`)
@@ -155,11 +198,26 @@
       xmlDocument = domParser.parseFromString(localStorage.getItem(`reminderData`), `text/xml`)
       reminderContentNode = xmlDocument.createElement(`reminderContent`)
       reminderContentNode.textContent = document.getElementById(`reminderContent`).value
+      reminderDelayInDaysNode = xmlDocument.createElement(`reminderDelayInDays`)
+      reminderDelayInDaysNode.textContent = document.getElementById(`reminderDelayInDays`).value
       reminderTimeNode = xmlDocument.createElement(`reminderTime`)
-      reminderTimeNode.innerHTML = document.getElementById(`reminderTime`).value
+      reminderTimeNode.textContent = document.getElementById(`reminderTime`).value
+      reminderStartingDateNode = xmlDocument.createElement(`reminderStartingDate`)
+      reminderStartingDateNode.textContent = document.getElementById(`reminderStartingDate`).value
+      if (document.getElementById(`fast`).checked) {
+        reminderTypeNode = xmlDocument.createElement(`reminderType`)
+        reminderTypeNode.textContent = `fast`
+      }
+      else if (document.getElementById(`fastAndSlow`).checked) {
+        reminderTypeNode = xmlDocument.createElement(`reminderType`)
+        reminderTypeNode.textContent = `fastAndSlow`
+      }
       eventNode = xmlDocument.createElement(`event`)
       eventNode.appendChild(reminderContentNode)
+      eventNode.appendChild(reminderDelayInDaysNode)
       eventNode.appendChild(reminderTimeNode)
+      eventNode.appendChild(reminderStartingDateNode)
+      eventNode.appendChild(reminderTypeNode)
       xmlDocument.getElementsByTagName(`root`)[0].appendChild(eventNode)
       xmlSerializer = new XMLSerializer()
       string = xmlSerializer.serializeToString(xmlDocument)
@@ -172,21 +230,6 @@
           }
         });
       });
-      function sendNotification(text) {
-        if (!myEndpoint) {
-          return
-        }
-        fetch(`/notify`, {
-          method: `POST`,
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            endpoint: myEndpoint,
-            text: text
-          })
-        })
-      }
       setInterval(function () {
         currentTime = new Date()
         if (
