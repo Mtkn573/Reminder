@@ -36,8 +36,16 @@
   <form id="choice" style="display: none; flex-direction: column; justify-content: flex-end; height: 100%;">
     <div>Proszę wprowadzić treść przypomnienia.</div>
     <input id="reminderContent">
+    <div>Proszę wprowadzić co ile dni ma być przypomnienie.</div>
+    <input>
     <div>Proszę wprowadzić godzinę przypomnienia.</div>
     <input id="reminderTime" type="time" required>
+    <div>Proszę wprowadzić datę od której ma być przypomnienie.</div>
+    <input required>
+    <div>Proszę wybrać długość dźwięku przypomnienia.</div>
+    <input type="radio" name="length" value="short" id="short" checked>
+    <label for="short">Krótki.</label><br <input type="radio" name="length" value="long" id="long">
+    <label for="long">Długi.</label>
     <input type="submit" id="accept" value=""
       style="background: url(accept.png); background-repeat: no-repeat; background-position: center; background-color: black; width: 100%; height: 60px;">
   </form>
@@ -111,6 +119,16 @@
       div = document.createElement(`div`)
       div.textContent = text
       box.appendChild(div)
+      deleteBtn = document.createElement('button')
+      deleteBtn.textContent = 'Usuń'
+      deleteBtn.onclick = function () {
+        box.remove()
+        if (window.audio) {
+          window.audio.pause()
+          window.audio.currentTime = 0
+        }
+      }
+      box.appendChild(deleteBtn)
       document.getElementById(`data`).appendChild(box)
       domParser = new DOMParser()
       xmlDocument = domParser.parseFromString(localStorage.getItem(`reminderData`), `text/xml`)
@@ -157,9 +175,13 @@
           seconds == 0
         ) {
           sendNotification(`„${document.getElementById(`reminderContent`).value}” o ${document.getElementById(`reminderTime`).value}.`)
+          window.audio = new Audio("notificationSound.mp3")
+          window.audio.play().catch(function (error) {
+            console.error("Audio playback failed:", error)
+          })
         }
       }, 1000)
-    })
+    })   
   </script>
 </body>
 
