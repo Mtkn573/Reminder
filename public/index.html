@@ -194,7 +194,7 @@
           currentTime.getMinutes() == Number(document.getElementById(`reminderTime`).value.substring(3, 5)) &&
           currentTime.getSeconds() == 0
         ) {
-          sendNotification(text)
+          sendNotification(document.getElementById(`reminderContent`).value)
         }
       }, 1000)
     })   
