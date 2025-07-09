@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reminder</title>
+  <link rel="icon" href="clock.png">
   <style>
     html,
     body {
@@ -36,7 +37,7 @@
   <form id="choice" style="display: none; flex-direction: column; justify-content: flex-end; height: 100%;">
     <div>Proszę wprowadzić treść przypomnienia.</div>
     <input id="reminderContent">
-    <div>Proszę wprowadzić co ile dni ma być przypomnienie.</div>
+    <div>Proszę wprowadzić co ile dni ma być przypomnienie (0 to jednorazowe przypomnienie).</div>
     <input id="reminderDelayInDays" type="number" min="0">
     <div>Proszę wprowadzić godzinę przypomnienia.</div>
     <input id="reminderTime" type="time" required>
@@ -91,8 +92,8 @@
           text: text
         })
       })
-    }
-    publicVapidKey = `BAOHBF0QJuiE-kKK2ZhRMMp0XHos3d7hzyuQuktw1RDmLvgtwzFQpNisLpQ8Be7PBxlTVQ6AjIXBkUPADjwlF2I`
+ 
+    publicVapidKey = `BHbDikiKqwuMBwj99qJ1tXBiW16DnnUo3Sl1XlVP1AK8yQANwzQEdliKVRp11Ystuzr8i74Kb_bjeuOhYDWEwEU`
     if (`serviceWorker` in navigator) {
       navigator.serviceWorker.register(`serviceWorker.js`).then(function () {
       }).catch(function (error) {
