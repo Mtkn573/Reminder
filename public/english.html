@@ -1,0 +1,246 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reminder</title>
+    <link rel="icon" href="clock.png">
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        .box {
+            width: 10%;
+            height: 30px;
+        }
+
+        #data {
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            align-items: flex-end;
+            width: 100%;
+            max-height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main" style="display: flex; height: 100%; align-items: flex-end;">
+        <div style="display: flex; flex-direction: column; height: 100%;">
+            <img id="add" src="addInEnglish.png" style="height: 90%;cursor:pointer;">
+            <img id="changeToPolish" src="polandFlag.jpg" style="height: 10%;cursor:pointer;">
+        </div>
+        <div id="data"></div>
+    </div>
+    <form id="choice" style="display: none; flex-direction: column; justify-content: flex-end; height: 100%;">
+        <img id="changeToPolish2" src="polandFlag.jpg" style="width:5%;height:10%;cursor:pointer;">
+        <div>Please enter reminder content.</div>
+        <input id="reminderContent">
+        <div>Please enter reminder time.</div>
+        <input id="reminderTime" type="time" required>
+        <input type="submit" id="accept" value=""
+            style="background: url(accept.png); background-repeat: no-repeat; background-position: center; background-color: black; width: 100%; height: 60px; cursor: pointer;">
+    </form>
+    <script>
+        document.getElementById('changeToPolish').addEventListener('click', function () {
+            window.location.href = 'index.html';
+        })
+        document.getElementById('changeToPolish2').addEventListener('click', function () {
+            window.location.href = 'choiceInPolish.html';
+        })
+        reminderContents = []
+        reminderTimes = []
+        function urlBase64ToUint8Array(base64String) {
+            padding = `=`.repeat((4 - base64String.length % 4) % 4)
+            base64 = (base64String + padding)
+                .replace(/-/g, `+`)
+                .replace(/_/g, `/`)
+            rawData = atob(base64)
+            return Uint8Array.from([...rawData].map(function (c) {
+                return c.charCodeAt(0)
+            }))
+        }
+        async function subscribe() {
+            registration = await navigator.serviceWorker.ready
+            subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+            })
+            await fetch(`/subscribe`, {
+                method: `POST`,
+                body: JSON.stringify(subscription),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+        }
+        function sendNotification(text) {
+            if (!myEndpoint) {
+                return
+            }
+            fetch(`/notify`, {
+                method: `POST`,
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    endpoint: myEndpoint,
+                    text: text
+                })
+            })
+        }
+        function onRemoveClick() {
+            time = ``
+            isFirstSpace = false
+            for (i = this.parentNode.getElementsByTagName(`div`)[0].textContent.length - 1; i >= 0; i--) {
+                if (this.parentNode.getElementsByTagName(`div`)[0].textContent[i] == ` `) {
+                    if (!isFirstSpace) {
+                        isFirstSpace = true
+                    }
+                    else {
+                        if (this.parentNode.getElementsByTagName(`div`)[0].textContent[i] == ` `) {
+                            time += this.parentNode.getElementsByTagName(`div`)[0].textContent[i + 1]
+                            time += this.parentNode.getElementsByTagName(`div`)[0].textContent[i + 2]
+                            time += this.parentNode.getElementsByTagName(`div`)[0].textContent[i + 3]
+                            time += this.parentNode.getElementsByTagName(`div`)[0].textContent[i + 4]
+                            time += this.parentNode.getElementsByTagName(`div`)[0].textContent[i + 5]
+                            break
+                        }
+                    }
+                }
+            }
+            last = 0
+            first = 0
+            for (i = this.parentNode.getElementsByTagName(`div`)[0].textContent.length - 1; i >= 0; i--) {
+                if (this.parentNode.getElementsByTagName(`div`)[0].textContent[i] == `”`) {
+                    last = i
+                    break
+                }
+            }
+            for (i = 0; i < this.parentNode.getElementsByTagName(`div`)[0].textContent.length; i++) {
+                if (this.parentNode.getElementsByTagName(`div`)[0].textContent[i] == `„`) {
+                    first = i
+                    break
+                }
+            }
+            content = this.parentNode.getElementsByTagName(`div`)[0].textContent.slice(first + 1, last)
+            domParser = new DOMParser()
+            xmlDocument = domParser.parseFromString(localStorage.getItem(`reminderData`), `text/xml`)
+            for (i = 0; i < xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`).length; i++) {
+                reminderContent = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderContent`)[0].textContent
+                reminderTime = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderTime`)[0].textContent
+                if (reminderContent == content && reminderTime == time) {
+                    xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].remove()
+                    break
+                }
+            }
+            xmlSerializer = new XMLSerializer()
+            string = xmlSerializer.serializeToString(xmlDocument)
+            localStorage.setItem(`reminderData`, string)
+            for (i = 0; i < reminderContents.length; i++) {
+                if (reminderContents[i] == content && reminderTimes[i] == time) {
+                    reminderContents.splice(i, 1)
+                    reminderTimes.splice(i, 1)
+                    break
+                }
+            }
+            this.parentNode.remove()
+        }
+        publicVapidKey = `BAOHBF0QJuiE-kKK2ZhRMMp0XHos3d7hzyuQuktw1RDmLvgtwzFQpNisLpQ8Be7PBxlTVQ6AjIXBkUPADjwlF2I`
+        if (`serviceWorker` in navigator) {
+            navigator.serviceWorker.register(`serviceWorker.js`).then(function () {
+            }).catch(function (error) {
+                console.log(`Service Worker registration failed:`, error)
+            })
+        }
+        subscribe()
+        if (localStorage.getItem(`reminderData`) == null) {
+            localStorage.setItem(`reminderData`, `<root></root>`)
+        }
+        domParser = new DOMParser()
+        xmlDocument = domParser.parseFromString(localStorage.getItem(`reminderData`), `text/xml`)
+        for (i = 0; i < xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`).length; i++) {
+            reminderContent = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderContent`)[0].textContent
+            reminderTime = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderTime`)[0].textContent
+            reminderContents.push(reminderContent)
+            reminderTimes.push(reminderTime)
+            text = `„${reminderContent}” planned reminder ${reminderTime} everyday.`
+            box = document.createElement(`div`)
+            box.style.display = `flex`
+            div = document.createElement(`div`)
+            div.textContent = text
+            div.style.display = `flex`
+            div.style.alignItems = `center`
+            box.appendChild(div)
+            remove = document.createElement(`img`)
+            remove.src = `remove.png`
+            remove.addEventListener(`click`, onRemoveClick)
+            box.appendChild(remove)
+            document.getElementById(`data`).appendChild(box)
+        }
+        document.getElementById(`add`).addEventListener(`click`, function () {
+            document.getElementById(`main`).style.display = `none`
+            document.getElementById(`choice`).style.display = `flex`
+        })
+        document.getElementById(`choice`).addEventListener(`submit`, function (event) {
+            event.preventDefault()
+            document.getElementById(`choice`).style.display = `none`
+            document.getElementById(`main`).style.display = `flex`
+            text = `„${reminderContent}” planned reminder ${reminderTime} everyday.`
+            box = document.createElement(`div`)
+            box.style.display = `flex`
+            div = document.createElement(`div`)
+            div.textContent = text
+            div.style.display = `flex`
+            div.style.alignItems = `center`
+            box.appendChild(div)
+            remove = document.createElement(`img`)
+            remove.src = `remove.png`
+            remove.addEventListener(`click`, onRemoveClick)
+            box.appendChild(remove)
+            document.getElementById(`data`).appendChild(box)
+            domParser = new DOMParser()
+            xmlDocument = domParser.parseFromString(localStorage.getItem(`reminderData`), `text/xml`)
+            reminderContentNode = xmlDocument.createElement(`reminderContent`)
+            reminderContentNode.textContent = document.getElementById(`reminderContent`).value
+            reminderContents.push(document.getElementById(`reminderContent`).value)
+            reminderTimeNode = xmlDocument.createElement(`reminderTime`)
+            reminderTimeNode.textContent = document.getElementById(`reminderTime`).value
+            reminderTimes.push(document.getElementById(`reminderTime`).value)
+            eventNode = xmlDocument.createElement(`event`)
+            eventNode.appendChild(reminderContentNode)
+            eventNode.appendChild(reminderTimeNode)
+            xmlDocument.getElementsByTagName(`root`)[0].appendChild(eventNode)
+            xmlSerializer = new XMLSerializer()
+            string = xmlSerializer.serializeToString(xmlDocument)
+            localStorage.setItem(`reminderData`, string)
+            myEndpoint = null
+            navigator.serviceWorker.ready.then(function (registration) {
+                registration.pushManager.getSubscription().then(function (subscription) {
+                    if (subscription) {
+                        myEndpoint = subscription.endpoint
+                    }
+                })
+            })
+        })
+        setInterval(function () {
+            currentTime = new Date()
+            for (i = 0; i < reminderContents.length; i++) {
+                if (
+                    currentTime.getHours() == Number(reminderTimes[i].substring(0, 2)) &&
+                    currentTime.getMinutes() == Number(reminderTimes[i].substring(3, 5)) &&
+                    currentTime.getSeconds() == 0
+                ) {
+                    sendNotification(reminderContents[i])
+                }
+            }
+        }, 1000)
+    </script>
+</body>
+
+</html>
