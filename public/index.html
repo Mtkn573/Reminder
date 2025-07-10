@@ -101,10 +101,14 @@
       localStorage.setItem(`reminderData`, `<root></root>`)
     }
     domParser = new DOMParser()
+    reminderContents = []
+    reminderTimes = []
     xmlDocument = domParser.parseFromString(localStorage.getItem(`reminderData`), `text/xml`)
     for (i = 0; i < xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`).length; i++) {
       reminderContent = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderContent`)[0].textContent
       reminderTime = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderTime`)[0].textContent
+      reminderContents.push(reminderContent)
+      reminderTimes.push(reminderTime)
       text = `„${reminderContent}” planowo następne przypomnienie ${reminderTime} codziennie.`
       box = document.createElement(`div`)
       box.style.display = `flex`
@@ -132,8 +136,10 @@
       xmlDocument = domParser.parseFromString(localStorage.getItem(`reminderData`), `text/xml`)
       reminderContentNode = xmlDocument.createElement(`reminderContent`)
       reminderContentNode.textContent = document.getElementById(`reminderContent`).value
+      reminderContents.push(document.getElementById(`reminderContent`).value)
       reminderTimeNode = xmlDocument.createElement(`reminderTime`)
       reminderTimeNode.textContent = document.getElementById(`reminderTime`).value
+      reminderTimes.push(document.getElementById(`reminderTime`).value)
       eventNode = xmlDocument.createElement(`event`)
       eventNode.appendChild(reminderContentNode)
       eventNode.appendChild(reminderTimeNode)
@@ -149,17 +155,19 @@
           }
         })
       })
-      setInterval(function () {
-        currentTime = new Date()
+    })
+    setInterval(function () {
+      currentTime = new Date()
+      for (i = 0; i < reminderContents.length; i++) {
         if (
-          currentTime.getHours() == Number(document.getElementById(`reminderTime`).value.substring(0, 2)) &&
-          currentTime.getMinutes() == Number(document.getElementById(`reminderTime`).value.substring(3, 5)) &&
+          currentTime.getHours() == Number(reminderTimes[i].substring(0, 2)) &&
+          currentTime.getMinutes() == Number(reminderTimes[i].substring(3, 5)) &&
           currentTime.getSeconds() == 0
         ) {
-          sendNotification(document.getElementById(`reminderContent`).value)
+          sendNotification(reminderContents[i])
         }
-      }, 1000)
-    })   
+      }
+    }, 1000)
   </script>
 </body>
 
