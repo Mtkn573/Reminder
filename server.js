@@ -2,9 +2,9 @@ express = require(`express`)
 webpush = require(`web-push`)
 bodyParser = require(`body-parser`)
 path = require(`path`)
-app = express()
-app.use(bodyParser.json())
-app.use(express.static(path.join(__dirname, `public`)))
+application = express()
+application.use(bodyParser.json())
+application.use(express.static(path.join(__dirname, `public`)))
 vapidKeys = {
     publicKey: process.env.VAPID_PUBLIC_KEY,
     privateKey: process.env.VAPID_PRIVATE_KEY
@@ -15,7 +15,7 @@ webpush.setVapidDetails(
     vapidKeys.privateKey
 )
 subscriptions = []
-app.post(`/subscribe`, function (request, response) {
+application.post(`/subscribe`, function (request, response) {
     if (!subscriptions.find(function (subscription) {
         return subscription.endpoint === request.body.endpoint
     })) {
@@ -23,7 +23,7 @@ app.post(`/subscribe`, function (request, response) {
     }
     response.status(201).json({})
 })
-app.post(`/notify`, async function (request, response) {
+application.post(`/notify`, async function (request, response) {
     payload = JSON.stringify({
         title: `Reminder.`,
         body: request.body.text
@@ -41,8 +41,8 @@ app.post(`/notify`, async function (request, response) {
         console.error(error)
         response.status(500).json({ message: "Notification sending error." })
     }
-});
+})
 PORT = process.env.PORT || 3000
-app.listen(PORT, function () {
+application.listen(PORT, function () {
     console.log(`Server running on port ${PORT}`)
 }) 
