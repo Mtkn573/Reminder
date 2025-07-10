@@ -37,19 +37,8 @@
   <form id="choice" style="display: none; flex-direction: column; justify-content: flex-end; height: 100%;">
     <div>Proszę wprowadzić treść przypomnienia.</div>
     <input id="reminderContent">
-    <div>Proszę wprowadzić co ile dni ma być przypomnienie (0 to jednorazowe przypomnienie).</div>
-    <input id="reminderDelayInDays" type="number" min="0">
     <div>Proszę wprowadzić godzinę przypomnienia.</div>
     <input id="reminderTime" type="time" required>
-    <div>Proszę wprowadzić datę od której ma być przypomnienie.</div>
-    <input id="reminderStartingDate" type="date" required>
-    <div>Proszę wybrać rodzaj przypomnienia.</div>
-    <div style="display: flex;">
-      <input type="radio" name="speed" value="fast" id="fast" checked>
-      <label for="fast">Szybkie.</label><br>
-      <input type="radio" name="speed" value="fastAndSlow" id="fastAndSlow">
-      <label for="fastAndSlow">Szybkie i wolne.</label>
-    </div>
     <input type="submit" id="accept" value=""
       style="background: url(accept.png); background-repeat: no-repeat; background-position: center; background-color: black; width: 100%; height: 60px;">
   </form>
@@ -92,7 +81,7 @@
           text: text
         })
       })
-    } 
+    }
     publicVapidKey = `BHbDikiKqwuMBwj99qJ1tXBiW16DnnUo3Sl1XlVP1AK8yQANwzQEdliKVRp11Ystuzr8i74Kb_bjeuOhYDWEwEU`
     if (`serviceWorker` in navigator) {
       navigator.serviceWorker.register(`serviceWorker.js`).then(function () {
@@ -115,36 +104,8 @@
     xmlDocument = domParser.parseFromString(localStorage.getItem(`reminderData`), `text/xml`)
     for (i = 0; i < xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`).length; i++) {
       reminderContent = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderContent`)[0].textContent
-      reminderDelayInDays = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderDelayInDays`)[0].textContent
       reminderTime = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderTime`)[0].textContent
-      reminderStartingDate = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderStartingDate`)[0].textContent
-      reminderType = xmlDocument.getElementsByTagName(`root`)[0].getElementsByTagName(`event`)[i].getElementsByTagName(`reminderType`)[0].textContent
-      if (reminderType == `fast`) {
-        if (reminderDelayInDays > 0) {
-          if (reminderDelayInDays == 1) {
-            text = `„${reminderContent}” planowo następne szybkie przypomnienie ${reminderTime} ${reminderStartingDate} codziennie.`
-          }
-          else {
-            text = `„${reminderContent}” planowo następne szybkie przypomnienie ${reminderTime} ${reminderStartingDate} co ${reminderDelayInDays} dni.`
-          }
-        }
-        else {
-          text = `„${reminderContent}” planowo następne szybkie przypomnienie ${reminderTime} ${reminderStartingDate}.`
-        }
-      }
-      else if (reminderType == `fastAndSlow`) {
-        if (reminderDelayInDays > 0) {
-          if (reminderDelayInDays == 1) {
-            text = `„${reminderContent}” planowo następne szybkie przypomnienie i planowo następne wolne przypomnienie ${reminderTime} ${reminderStartingDate} codziennie.`
-          }
-          else {
-            text = `„${reminderContent}” planowo następne szybkie przypomnienie i planowo następne wolne przypomnienie ${reminderTime} ${reminderStartingDate} co ${reminderDelayInDays} dni.`
-          }
-        }
-        else {
-          text = `„${reminderContent}” planowo następne szybkie przypomnienie i planowo następne wolne przypomnienie ${reminderTime} ${reminderStartingDate}.`
-        }
-      }
+      text = `„${reminderContent}” planowo następne przypomnienie ${reminderTime} codziennie.`
       box = document.createElement(`div`)
       box.style.display = `flex`
       div = document.createElement(`div`)
@@ -160,35 +121,7 @@
       event.preventDefault()
       document.getElementById(`choice`).style.display = `none`
       document.getElementById(`main`).style.display = `flex`
-      if (document.getElementById(`reminderDelayInDays`).value == ``) {
-        document.getElementById(`reminderDelayInDays`).value = 0
-      }
-      if (document.getElementById(`fast`).checked) {
-        if (document.getElementById(`reminderDelayInDays`).value > 0) {
-          if (document.getElementById(`reminderDelayInDays`).value == 1) {
-            text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`).value} codziennie.`
-          }
-          else {
-            text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`).value} co ${document.getElementById(`reminderDelayInDays`).value} dni.`
-          }
-        }
-        else {
-          text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`).value}.`
-        }
-      }
-      else if (document.getElementById(`fastAndSlow`).checked) {
-        if (document.getElementById(`reminderDelayInDays`).value > 0) {
-          if (document.getElementById(`reminderDelayInDays`).value == 1) {
-            text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie i planowo następne wolne przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`).value} codziennie.`
-          }
-          else {
-            text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie i planowo następne wolne przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`).value} co ${document.getElementById(`reminderDelayInDays`).value} dni.`
-          }
-        }
-        else {
-          text = `„${document.getElementById(`reminderContent`).value}” planowo następne szybkie przypomnienie i planowo następne wolne przypomnienie ${document.getElementById(`reminderTime`).value} ${document.getElementById(`reminderStartingDate`).value}.`
-        }
-      }
+      text = `„${document.getElementById(`reminderContent`).value}” planowo następne przypomnienie ${document.getElementById(`reminderTime`).value} codziennie.`
       box = document.createElement(`div`)
       box.style.display = `flex`
       div = document.createElement(`div`)
@@ -199,26 +132,11 @@
       xmlDocument = domParser.parseFromString(localStorage.getItem(`reminderData`), `text/xml`)
       reminderContentNode = xmlDocument.createElement(`reminderContent`)
       reminderContentNode.textContent = document.getElementById(`reminderContent`).value
-      reminderDelayInDaysNode = xmlDocument.createElement(`reminderDelayInDays`)
-      reminderDelayInDaysNode.textContent = document.getElementById(`reminderDelayInDays`).value
       reminderTimeNode = xmlDocument.createElement(`reminderTime`)
       reminderTimeNode.textContent = document.getElementById(`reminderTime`).value
-      reminderStartingDateNode = xmlDocument.createElement(`reminderStartingDate`)
-      reminderStartingDateNode.textContent = document.getElementById(`reminderStartingDate`).value
-      if (document.getElementById(`fast`).checked) {
-        reminderTypeNode = xmlDocument.createElement(`reminderType`)
-        reminderTypeNode.textContent = `fast`
-      }
-      else if (document.getElementById(`fastAndSlow`).checked) {
-        reminderTypeNode = xmlDocument.createElement(`reminderType`)
-        reminderTypeNode.textContent = `fastAndSlow`
-      }
       eventNode = xmlDocument.createElement(`event`)
       eventNode.appendChild(reminderContentNode)
-      eventNode.appendChild(reminderDelayInDaysNode)
       eventNode.appendChild(reminderTimeNode)
-      eventNode.appendChild(reminderStartingDateNode)
-      eventNode.appendChild(reminderTypeNode)
       xmlDocument.getElementsByTagName(`root`)[0].appendChild(eventNode)
       xmlSerializer = new XMLSerializer()
       string = xmlSerializer.serializeToString(xmlDocument)
