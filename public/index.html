@@ -53,6 +53,7 @@
     document.getElementById(`changeToEnglish2`).addEventListener(`click`, function () {
       window.location.href = `choiceInEnglish.html`
     })
+    myEndpoint = null
     reminderContents = []
     reminderTimes = []
     function urlBase64ToUint8Array(base64String) {
@@ -165,7 +166,16 @@
         document.getElementById(`main`).style.display = `flex`
       }
     })
-    subscribe()
+    if (Notification.permission == "granted") {
+      subscribe();
+    }
+    else if (Notification.permission != "denied") {
+      Notification.requestPermission().then(function (permission) {
+        if (permission === "granted") {
+          subscribe()
+        }
+      })
+    }
     if (localStorage.getItem(`reminderData`) == null) {
       localStorage.setItem(`reminderData`, `<root></root>`)
     }
@@ -228,7 +238,6 @@
       xmlSerializer = new XMLSerializer()
       string = xmlSerializer.serializeToString(xmlDocument)
       localStorage.setItem(`reminderData`, string)
-      myEndpoint = null
       navigator.serviceWorker.ready.then(function (registration) {
         registration.pushManager.getSubscription().then(function (subscription) {
           if (subscription) {
